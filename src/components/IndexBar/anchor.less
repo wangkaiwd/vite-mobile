@@ -1,10 +1,14 @@
 .index-anchor {
-  padding: 6px 8px;
-  border: 1px solid lightblue;
+  &-inner {
+    padding: 6px 8px;
+    border: 1px solid lightblue;
+  }
   &-fixed {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
+    z-index: 1;
+    background-color: pink;
   }
 }
