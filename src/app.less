@@ -5,8 +5,17 @@
   }
   display: flex;
   flex-direction: column;
-  .content {
-    flex: 1;
-    overflow-y: auto;
+  .top {
+    height: 60px;
+    flex-shrink: 0;
+    background-color: blue;
   }
+  .content {
+  }
+  .bottom {
+    height: 1800px;
+    background-color: green;
+    flex-shrink: 0;
+  }
+  //overflow-y: auto;
 }

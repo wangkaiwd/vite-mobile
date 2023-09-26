@@ -7,6 +7,7 @@ import { COMPONENT_KEY } from '../constant'
 import { useScrollParent } from '../../hooks/useScrollParent.tsx'
 import { IndexBarContext } from './context.tsx'
 import { useMemoizedFn } from '../../hooks/useMemoizedFn.ts'
+import { map } from 'lodash-es'
 
 interface IndexBarProps {
   children: ReactNode,
@@ -21,11 +22,36 @@ const IndexBar = (props: IndexBarProps) => {
   const anchorRefs = useRef<{ [k: string]: IndexAnchorInstance }>({})
   const scrollParent = useScrollParent(rootRef)
 
-  const onScroll = useMemoizedFn((e: React.MouseEvent) => {
-    Object.keys(anchorRefs.current).map(key => {
-      const anchorInstance = anchorRefs.current[key]
-      anchorInstance.onScroll(e)
+  const findActiveAnchor = () => {
+    const anchorRects = map(anchorRefs.current, (val, key) => {
+      const rect = val.root!.getBoundingClientRect()
+      return {
+        key,
+        rect
+      }
     })
+
+    for (let i = 0; i < anchorRects.length; i++) {
+
+      const cur = anchorRects[i]
+      const next = anchorRects[i + 1]
+      // last anchor
+      if (!next) {
+        setActiveIndex(cur.key)
+        return
+      }
+      if (cur.rect.top <= 0 && next.rect.top > 0) {
+        setActiveIndex(cur.key)
+        return
+      }
+    }
+  }
+  const onScroll = useMemoizedFn((e: React.MouseEvent) => {
+    map(anchorRefs.current, (val) => {
+      val.onScroll(e)
+    })
+
+    findActiveAnchor()
   })
   useEffect(() => {
     scrollParent?.addEventListener('scroll', onScroll)

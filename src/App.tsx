@@ -1,17 +1,20 @@
 import { Cell } from 'react-vant'
 import IndexBar from './components/IndexBar'
 import './app.less'
+import { useState } from 'react'
 
-const indexList: string[] = []
+const _indexList: string[] = []
 const charCodeOfA = 'A'.charCodeAt(0)
 
 for (let i = 0; i < 26; i += 1) {
-  indexList.push(String.fromCharCode(charCodeOfA + i))
+  _indexList.push(String.fromCharCode(charCodeOfA + i))
 }
 
 const App = () => {
+  const [indexList,] = useState<string[]>(_indexList)
   return (
     <div className={'app'}>
+      {/*<div className="top"></div>*/}
       <div className={'content'}>
         <IndexBar
           indexList={indexList}
@@ -26,6 +29,7 @@ const App = () => {
           ))}
         </IndexBar>
       </div>
+      {/*<div className="bottom"></div>*/}
     </div>
   )
 }

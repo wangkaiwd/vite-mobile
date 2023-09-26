@@ -10,7 +10,7 @@ interface AnchorProps {
 
 export interface IndexAnchorInstance {
   root: HTMLDivElement | null;
-  onScroll: (e?: React.MouseEvent) => void
+  onScroll: (e?: React.MouseEvent) => void;
 }
 
 // unique property with symbol
@@ -26,7 +26,7 @@ const _IndexAnchor = forwardRef<IndexAnchorInstance, AnchorProps>((props, ref) =
       const { width, height } = innerRef.current.getBoundingClientRect()
       return {
         width,
-        height
+        height,
       }
     }
     return {}
