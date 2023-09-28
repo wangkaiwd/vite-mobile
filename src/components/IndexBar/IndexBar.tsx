@@ -21,7 +21,6 @@ const IndexBar = (props: IndexBarProps) => {
   const rootRef = useRef<HTMLDivElement>(null)
   const anchorRefs = useRef<{ [k: string]: IndexAnchorInstance }>({})
   const scrollParent = useScrollParent(rootRef)
-
   const findActiveAnchor = () => {
     const anchorRects = map(anchorRefs.current, (val, key) => {
       const rect = val.root!.getBoundingClientRect()
@@ -30,28 +29,30 @@ const IndexBar = (props: IndexBarProps) => {
         rect
       }
     })
-
     for (let i = 0; i < anchorRects.length; i++) {
-
       const cur = anchorRects[i]
       const next = anchorRects[i + 1]
       // last anchor
       if (!next) {
-        setActiveIndex(cur.key)
-        return
+        return cur.key
       }
-      if (cur.rect.top <= 0 && next.rect.top > 0) {
-        setActiveIndex(cur.key)
-        return
+      const curTop = Math.floor(cur.rect.top)
+      const nextTop = Math.floor(next.rect.top)
+      if (curTop <= 0 && nextTop > 0) {
+        return cur.key
       }
     }
   }
   const onScroll = useMemoizedFn((e: React.MouseEvent) => {
+    // sticky
     map(anchorRefs.current, (val) => {
       val.onScroll(e)
     })
 
-    findActiveAnchor()
+    const anchor = findActiveAnchor()
+    if (anchor) {
+      setActiveIndex(anchor)
+    }
   })
   useEffect(() => {
     scrollParent?.addEventListener('scroll', onScroll)
@@ -60,7 +61,6 @@ const IndexBar = (props: IndexBarProps) => {
     }
   }, [scrollParent])
   const onClickIndex = (index: string) => {
-    setActiveIndex(index)
     anchorRefs.current?.[index].root?.scrollIntoView()
   }
   const memoChildren = useMemo(() => {

@@ -1,20 +1,42 @@
-const scrollProperties = ['auto', 'scroll'];
+const scrollProperties = ['auto', 'scroll']
 export const getScrollParent = (el: HTMLElement) => {
-  let current = el.parentElement;
+  let current = el.parentElement
   while (current) {
-    const computedStyle = getComputedStyle(current);
-    const overflowY = computedStyle.overflowY;
+    const computedStyle = getComputedStyle(current)
+    const overflowY = computedStyle.overflowY
     if (scrollProperties.includes(overflowY)) {
-      return current;
+      return current
     }
-    current = current.parentElement;
+    current = current.parentElement
   }
-  return window;
-};
+  return window
+}
 
+export const isWindow = (value: any): value is Window => {
+  return value === window
+}
 export const getScrollTop = (el: HTMLElement | Window) => {
-  if (el === window) {
-    return el.scrollY;
+  if (isWindow(el)) {
+    return el.scrollY
   }
-  return (el as HTMLElement).scrollTop;
-};
+  return el.scrollTop
+}
+
+export const getRect = (el: HTMLElement | Window) => {
+  if (isWindow(el)) {
+    return {
+      height: window.innerHeight,
+      width: window.innerWidth,
+      left: -window.scrollX,
+      top: -window.scrollY,
+      bottom: window.innerHeight,
+      right: innerWidth,
+      x: -window.scrollX,
+      y: -window.scrollY
+    } as DOMRect
+  }
+  return el.getBoundingClientRect()
+}
+
+
+
