@@ -46,7 +46,7 @@ const IndexBar = (props: IndexBarProps) => {
   const onScroll = useMemoizedFn((e: React.MouseEvent) => {
     // sticky
     map(anchorRefs.current, (val) => {
-      val.onScroll(e)
+      val.onScroll(anchorRefs, e)
     })
 
     const anchor = findActiveAnchor()

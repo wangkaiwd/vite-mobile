@@ -1,8 +1,9 @@
 import './anchor.less'
-import React, { forwardRef, useImperativeHandle, useMemo, useRef, useState } from 'react'
+import React, { forwardRef, MutableRefObject, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { COMPONENT_KEY } from '../constant'
 import clsx from 'clsx'
 import { useScrollParent } from '../../hooks/useScrollParent.tsx'
+import { useSetState } from '../../hooks/useSetState.ts'
 
 interface AnchorProps {
   index: string;
@@ -10,7 +11,7 @@ interface AnchorProps {
 
 export interface IndexAnchorInstance {
   root: HTMLDivElement | null;
-  onScroll: (e?: React.MouseEvent) => void;
+  onScroll: (anchorRefs: MutableRefObject<Record<string, IndexAnchorInstance>>, e?: React.MouseEvent) => void;
 }
 
 // unique property with symbol
@@ -19,6 +20,7 @@ const _IndexAnchor = forwardRef<IndexAnchorInstance, AnchorProps>((props, ref) =
   const rootRef = useRef<HTMLDivElement>(null)
   const innerRef = useRef<HTMLDivElement>(null)
   const { index } = props
+  const [state, setState] = useSetState({ active: false })
   const [isSticky, setIsSticky] = useState(false)
   const scrollParent = useScrollParent(rootRef)
   const rootStyle = useMemo(() => {
@@ -31,7 +33,7 @@ const _IndexAnchor = forwardRef<IndexAnchorInstance, AnchorProps>((props, ref) =
     }
     return {}
   }, [isSticky])
-  const onScroll = () => {
+  const onScroll: IndexAnchorInstance['onScroll'] = () => {
     if (!scrollParent || !rootRef.current) {
       return
     }
