@@ -1,17 +1,21 @@
 import './anchor.less'
-import React, { forwardRef, MutableRefObject, useImperativeHandle, useMemo, useRef, useState } from 'react'
+import { forwardRef, useImperativeHandle, useMemo, useRef } from 'react'
 import { COMPONENT_KEY } from '../constant'
 import clsx from 'clsx'
-import { useScrollParent } from '../../hooks/useScrollParent.tsx'
-import { useSetState } from '../../hooks/useSetState.ts'
+import { type SetState, useSetState } from '../../hooks/useSetState.ts'
 
 interface AnchorProps {
   index: string;
 }
 
+interface State {
+  active: boolean
+  top: number
+}
+
 export interface IndexAnchorInstance {
   root: HTMLDivElement | null;
-  onScroll: (anchorRefs: MutableRefObject<Record<string, IndexAnchorInstance>>, e?: React.MouseEvent) => void;
+  setState: SetState<State>
 }
 
 // unique property with symbol
@@ -20,9 +24,7 @@ const _IndexAnchor = forwardRef<IndexAnchorInstance, AnchorProps>((props, ref) =
   const rootRef = useRef<HTMLDivElement>(null)
   const innerRef = useRef<HTMLDivElement>(null)
   const { index } = props
-  const [state, setState] = useSetState({ active: false })
-  const [isSticky, setIsSticky] = useState(false)
-  const scrollParent = useScrollParent(rootRef)
+  const [state, setState] = useSetState<State>({ active: false, top: 0 })
   const rootStyle = useMemo(() => {
     if (innerRef.current) {
       const { width, height } = innerRef.current.getBoundingClientRect()
@@ -32,28 +34,22 @@ const _IndexAnchor = forwardRef<IndexAnchorInstance, AnchorProps>((props, ref) =
       }
     }
     return {}
-  }, [isSticky])
-  const onScroll: IndexAnchorInstance['onScroll'] = () => {
-    if (!scrollParent || !rootRef.current) {
-      return
-    }
-    const { top } = rootRef.current.getBoundingClientRect()
-    if (top <= 0) {
-      setIsSticky(true)
-    } else {
-      setIsSticky(false)
-    }
-  }
+  }, [state.active])
   useImperativeHandle(ref, () => {
     return {
-      // will this need to a ref ?
       root: rootRef.current,
-      onScroll
+      setState
     }
   })
   return (
     <div className={'index-anchor'} ref={rootRef} style={rootStyle}>
-      <div className={clsx('index-anchor-inner', { 'index-anchor-fixed': isSticky })} ref={innerRef}>
+      <div
+        className={clsx('index-anchor-inner', { 'index-anchor-fixed': state.active })}
+        ref={innerRef}
+        style={{
+          top: state.top
+        }}
+      >
         {index}
       </div>
     </div>
