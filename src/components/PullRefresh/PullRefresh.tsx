@@ -7,9 +7,10 @@ interface PullRefreshProps {
 
 const PullRefresh = (props: PullRefreshProps) => {
   const { children } = props
+
   return (
     <div className="pull-refresh">
-      <div className="pull-refresh-head"></div>
+      <div className="pull-refresh-head">下拉刷新</div>
       {children}
     </div>
   )
