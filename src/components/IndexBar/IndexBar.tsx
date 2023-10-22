@@ -127,9 +127,9 @@ const IndexBar = (props: IndexBarProps) => {
     touchingRef.current = false
   }
   const _onTouchMove = (e: React.TouchEvent) => {
-    e.stopPropagation()
     if (!touchingRef.current) {return}
-    const touchInfo = e.targetTouches[0]
+    e.stopPropagation()
+    const touchInfo = e.touches[0]
     const target = document.elementFromPoint(touchInfo.clientX, touchInfo.clientY)
     if (!target) {return}
     const anchor = (target as any).dataset?.index

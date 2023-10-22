@@ -1,1 +1,1 @@
-export const COMPONENT_KEY = 'COMPONENT_KEY'
+export const COMPONENT_KEY = '__COMPONENT_KEY'
