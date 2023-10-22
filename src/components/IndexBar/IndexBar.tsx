@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Children, cloneElement, useEffect, useMemo, useRef, useState } from 'react'
+import React, { Children, cloneElement, useMemo, useRef, useState } from 'react'
 import IndexAnchor, { INDEX_ANCHOR_KEY, type IndexAnchorInstance } from './IndexAnchor.tsx'
 import './index-bar.less'
 import clsx from 'clsx'
@@ -8,6 +8,7 @@ import { useScrollParent } from '../../hooks/useScrollParent.tsx'
 import { IndexBarContext } from './context.tsx'
 import { map } from 'lodash-es'
 import { useThrottleFn } from '../../hooks/useThrottleFn.ts'
+import { useEvent } from '../../hooks/useEvent.ts'
 
 interface IndexBarProps {
   children: ReactNode,
@@ -15,15 +16,15 @@ interface IndexBarProps {
 }
 
 // difficulty: implement previous anchor title and current anchor title scroll to top together
-
 const IndexBar = (props: IndexBarProps) => {
   const { children, indexList } = props
   // fixme: indexList maybe obtain by http request
   const [activeIndex, setActiveIndex] = useState(indexList[0])
   const rootRef = useRef<HTMLDivElement>(null)
   const anchorRefs = useRef<{ [k: string]: IndexAnchorInstance }>({})
+  const indicesRef = useRef<HTMLDivElement>(null)
   const scrollParent = useScrollParent(rootRef)
-
+  const touchingRef = useRef(false)
   const findActiveAnchor = () => {
     const anchorRects = map(anchorRefs.current, (val, key) => {
       const rect = val.root!.getBoundingClientRect()
@@ -93,13 +94,9 @@ const IndexBar = (props: IndexBarProps) => {
     }
   }
   const { run: onScroll } = useThrottleFn(_onScroll, { wait: 30 })
-  useEffect(() => {
-    scrollParent?.addEventListener('scroll', onScroll)
-    return () => {
-      scrollParent?.removeEventListener('scroll', onScroll)
-    }
-  }, [scrollParent])
+  useEvent('scroll', onScroll, { target: scrollParent })
   const onClickIndex = (index: string) => {
+    if (!index) {return}
     anchorRefs.current?.[index].root?.scrollIntoView()
   }
   const memoChildren = useMemo(() => {
@@ -123,15 +120,40 @@ const IndexBar = (props: IndexBarProps) => {
     }
     return renderChildren(children)
   }, [children])
+  const onTouchStart = () => {
+    touchingRef.current = true
+  }
+  const onTouchEnd = () => {
+    touchingRef.current = false
+  }
+  const _onTouchMove = (e: React.TouchEvent) => {
+    e.stopPropagation()
+    if (!touchingRef.current) {return}
+    const touchInfo = e.targetTouches[0]
+    const target = document.elementFromPoint(touchInfo.clientX, touchInfo.clientY)
+    if (!target) {return}
+    const anchor = (target as any).dataset?.index
+    onClickIndex(anchor)
+
+  }
+  const { run: onTouchMove } = useThrottleFn(_onTouchMove, { wait: 100 })
+  useEvent('touchmove', onTouchMove, { passive: false, target: indicesRef })
+
   const renderIndices = () => {
     return (
-      <div className={'index-bar-indices'}>
+      <div
+        className={'index-bar-indices'}
+        ref={indicesRef}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+      >
         {indexList.map((item, i) => {
           return (
             <div
               key={i}
               className={clsx('index-bar-index', { 'index-bar-index-active': activeIndex === item })}
               onClick={() => onClickIndex(item)}
+              data-index={item}
             >
               {item}
             </div>
