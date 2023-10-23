@@ -1,12 +1,16 @@
 .pull-refresh {
   position: relative;
+  border: 2px solid red;
+  transition-property: transform;
+  transition-timing-function: linear;
+  transition-duration: 300ms;
   &-head {
     position: absolute;
     top: 0;
     left: 0;
     transform: translateY(-100%);
-    transition: all 1s;
     text-align: center;
     width: 100%;
+    padding: 4vw 0;
   }
 }
